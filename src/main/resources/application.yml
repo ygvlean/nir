@@ -1,0 +1,11 @@
+spring:
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/knowledgebase?stringtype=unspecified
+    username: postgres
+    password: 31415
+    driver-class-name: org.postgresql.Driver

@@ -1,0 +1,16 @@
+DELETE FROM rule_dependencies;
+DELETE FROM explanations;
+DELETE FROM rules;
+DELETE FROM fact_group_members;
+DELETE FROM fact_groups;
+DELETE FROM diagnostic_data;
+DELETE FROM recommendations;
+DELETE FROM diagnostic_logs;
+ALTER SEQUENCE rules_id_seq RESTART WITH 1;
+ALTER SEQUENCE explanations_id_seq RESTART WITH 1;
+ALTER SEQUENCE rule_dependencies_id_seq RESTART WITH 1;
+ALTER SEQUENCE fact_groups_id_seq RESTART WITH 1;
+ALTER SEQUENCE fact_group_members_id_seq RESTART WITH 1;
+ALTER SEQUENCE diagnostic_data_id_seq RESTART WITH 1;
+ALTER SEQUENCE recommendations_id_seq RESTART WITH 1;
+ALTER SEQUENCE diagnostic_logs_id_seq RESTART WITH 1;

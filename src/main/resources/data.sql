@@ -42,66 +42,54 @@ INSERT INTO recommendations (diagnosis, recommendation) VALUES
                                                             ('Белый дым из выхлопа', 'Осмотрите ГБЦ и систему охлаждения.'),
                                                             ('Критически низкое давление масла', 'Проверьте компрессию и расход масла.');
 
-INSERT INTO rules (parameter_name, comparison_operator, threshold_value, text_value, action, rule_type)
+INSERT INTO rules (rule_name, parameter_name, comparison_operator, threshold_value, text_value, action, rule_type)
 VALUES
-    -- 🔥 1️⃣ Симптомы (начальные факты, приходят на вход)
-    ('temperature', '>', 100, NULL, 'Перегрев двигателя', 'symptom'),
-    ('exhaust_color', '=', NULL, 'white', 'Белый дым из выхлопа', 'symptom'),
-    ('exhaust_color', '=', NULL, 'black', 'Чёрный дым из выхлопа', 'symptom'),
-    ('oil_pressure', '<', 10, NULL, 'Критически низкое давление масла', 'symptom'),
-    ('engine_vibration', '>', 70, NULL, 'Сильные вибрации двигателя', 'symptom'),
-    ('fuel_pressure', '<', 30, NULL, 'Проблема с подачей топлива', 'symptom'),
-    ('compression_drop', '>', 20, NULL, 'Потеря компрессии', 'symptom'),
+    -- 🔥 1️⃣ Симптомы (то, что замечает водитель)
+    ('high_oil_consumption', NULL, '=', NULL, 'расход масла', 'Возможные причины расхода масла', 'symptom'),
+    ('low_power', NULL, '=', NULL, 'потеря мощности', 'Возможные причины потери мощности', 'symptom'),
+    ('engine_misfire', NULL, '=', NULL, 'троение двигателя', 'Возможные причины троения двигателя', 'symptom'),
+    ('bad_start', NULL, '=', NULL, 'плохой запуск', 'Возможные причины плохого запуска', 'symptom'),
 
-    -- 🔍 2️⃣ Промежуточные правила (аналитика эксперта, требуют подтверждения)
-    ('coolant_level', '<', 50, NULL, 'Недостаточный уровень охлаждающей жидкости', 'intermediate'),
-    ('radiator_status', '=', 0, NULL, 'Радиатор неисправен', 'intermediate'),
-    ('thermostat_status', '=', 0, NULL, 'Неисправен термостат', 'intermediate'),
-    ('spark_plug_status', '=', 0, NULL, 'Неисправные свечи зажигания', 'intermediate'),
-    ('ignition_coil_status', '=', 0, NULL, 'Проблема с катушкой зажигания', 'intermediate'),
-    ('oil_consumption', '>', 1, NULL, 'Повышенный расход масла', 'intermediate'),
-    ('timing_belt_status', '=', 0, NULL, 'Обрыв ремня ГРМ', 'intermediate'),
+    -- 🔍 2️⃣ Объективные ошибки (то, что выдаёт автомобиль)
+    ('low_oil_pressure', 'oil_pressure', '<', 10, NULL, 'Критически низкое давление масла', 'error'),
+    ('low_fuel_pressure', 'fuel_pressure', '<', 30, NULL, 'Ошибка давления топлива', 'error'),
+    ('ignition_misfire_error', 'ignition_misfire', '=', 1, NULL, 'Ошибка пропусков зажигания', 'error'),
 
-    -- 🏁 3️⃣ Финальные диагнозы (итоговая причина, не зависит от конкретного параметра)
-    (NULL, '=', NULL, NULL, 'Пробита прокладка ГБЦ', 'final'),
-    (NULL, '=', NULL, NULL, 'Износ поршневых колец', 'final'),
-    (NULL, '=', NULL, NULL, 'Засорён топливный фильтр', 'final'),
-    (NULL, '=', NULL, NULL, 'Обрыв ремня ГРМ', 'final'),
-    (NULL, '=', NULL, NULL, 'Перебои в зажигании из-за неисправной катушки', 'final');
+    -- 🔍 3️⃣ Промежуточные причины (анализ эксперта)
+    ('compression_loss', 'compression_drop', '>', 20, NULL, 'Потеря компрессии', 'intermediate'),
+    ('increased_oil_consumption', 'oil_consumption', '>', 1, NULL, 'Повышенный расход масла', 'intermediate'),
+    ('injector_fault', 'fuel_injector_status', '=', 0, NULL, 'Неисправность форсунки', 'intermediate'),
+    ('spark_plug_issue', 'spark_plug_status', '=', 0, NULL, 'Проблема со свечами зажигания', 'intermediate'),
+
+    -- 🏁 4️⃣ Финальные неисправности
+    ('worn_piston_rings', NULL, '=', NULL, NULL, 'Износ поршневых колец', 'final'),
+    ('blown_head_gasket', NULL, '=', NULL, NULL, 'Пробита прокладка ГБЦ', 'final'),
+    ('fuel_pump_failure', NULL, '=', NULL, NULL, 'Неисправность топливного насоса', 'final'),
+    ('clogged_fuel_filter', NULL, '=', NULL, NULL, 'Засорён топливный фильтр', 'final');
 
 
-INSERT INTO rule_dependencies (parent_rule_id, child_rule_id, requires_confirmation)
+INSERT INTO rule_dependencies (parent_rule_id, child_rule_id, dependency_type)
 VALUES
-    -- 🔥 Перегрев двигателя → Проверка охлаждающей системы
-    ((SELECT id FROM rules WHERE action = 'Перегрев двигателя'),
-    (SELECT id FROM rules WHERE action = 'Недостаточный уровень охлаждающей жидкости'), TRUE),
-    ((SELECT id FROM rules WHERE action = 'Перегрев двигателя'),
-     (SELECT id FROM rules WHERE action = 'Радиатор неисправен'), TRUE),
-    ((SELECT id FROM rules WHERE action = 'Перегрев двигателя'),
-     (SELECT id FROM rules WHERE action = 'Неисправен термостат'), TRUE),
+    -- 🔥 Расход масла → Возможные причины
+    ((SELECT id FROM rules WHERE rule_name = 'high_oil_consumption'),
+     (SELECT id FROM rules WHERE rule_name = 'increased_oil_consumption'), 'single'),
+    ((SELECT id FROM rules WHERE rule_name = 'high_oil_consumption'),
+     (SELECT id FROM rules WHERE rule_name = 'compression_loss'), 'single'),
 
-    -- 🔥 Критически низкое давление масла → Проверка поршневой группы
-    ((SELECT id FROM rules WHERE action = 'Критически низкое давление масла'),
-     (SELECT id FROM rules WHERE action = 'Износ поршневых колец'), TRUE),
-    ((SELECT id FROM rules WHERE action = 'Критически низкое давление масла'),
-     (SELECT id FROM rules WHERE action = 'Повышенный расход масла'), TRUE),
+    -- 🔥 Потеря мощности → Возможные причины
+    ((SELECT id FROM rules WHERE rule_name = 'low_power'),
+     (SELECT id FROM rules WHERE rule_name = 'spark_plug_issue'), 'single'),
+    ((SELECT id FROM rules WHERE rule_name = 'low_power'),
+     (SELECT id FROM rules WHERE rule_name = 'injector_fault'), 'single'),
 
-    -- 🔥 Белый дым из выхлопа → Возможные причины
-    ((SELECT id FROM rules WHERE action = 'Белый дым из выхлопа'),
-     (SELECT id FROM rules WHERE action = 'Пробита прокладка ГБЦ'), TRUE),
+    -- 🔥 Ошибки → Причины
+    ((SELECT id FROM rules WHERE rule_name = 'low_oil_pressure'),
+     (SELECT id FROM rules WHERE rule_name = 'worn_piston_rings'), 'single'),
+    ((SELECT id FROM rules WHERE rule_name = 'low_fuel_pressure'),
+     (SELECT id FROM rules WHERE rule_name = 'fuel_pump_failure'), 'single'),
 
-    -- 🔥 Потеря компрессии → Возможные причины
-    ((SELECT id FROM rules WHERE action = 'Потеря компрессии'),
-     (SELECT id FROM rules WHERE action = 'Износ поршневых колец'), TRUE),
-
-    -- 🔥 Проблема с подачей топлива → Проверка системы подачи топлива
-    ((SELECT id FROM rules WHERE action = 'Проблема с подачей топлива'),
-     (SELECT id FROM rules WHERE action = 'Засорён топливный фильтр'), TRUE),
-
-    -- 🔥 Сильные вибрации двигателя → Возможные причины
-    ((SELECT id FROM rules WHERE action = 'Сильные вибрации двигателя'),
-     (SELECT id FROM rules WHERE action = 'Обрыв ремня ГРМ'), TRUE),
-
-    -- 🔥 Проблема с катушкой зажигания → Возможные последствия
-    ((SELECT id FROM rules WHERE action = 'Проблема с катушкой зажигания'),
-     (SELECT id FROM rules WHERE action = 'Перебои в зажигании из-за неисправной катушки'), TRUE);
+    -- 🔥 Троение двигателя + Плохой запуск → Свечи
+    ((SELECT id FROM rules WHERE rule_name = 'engine_misfire'),
+     (SELECT id FROM rules WHERE rule_name = 'spark_plug_issue'), 'single'),
+    ((SELECT id FROM rules WHERE rule_name = 'bad_start'),
+     (SELECT id FROM rules WHERE rule_name = 'spark_plug_issue'), 'single');

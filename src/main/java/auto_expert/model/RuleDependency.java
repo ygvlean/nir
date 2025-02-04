@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 public class RuleDependency {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "parent_rule_id", nullable = false)
@@ -17,8 +17,8 @@ public class RuleDependency {
     private Rule childRule;
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     public Rule getParentRule() { return parentRule; }
     public void setParentRule(Rule parentRule) { this.parentRule = parentRule; }

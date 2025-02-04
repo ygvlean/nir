@@ -1,11 +1,12 @@
 CREATE TABLE rules (
                        id SERIAL PRIMARY KEY,
+                       rule_name TEXT,
                        parameter_name TEXT, -- Может быть NULL для финальных выводов
                        comparison_operator VARCHAR(10), -- Оператор сравнения (NULL для финальных выводов)
                        threshold_value DOUBLE PRECISION, -- Числовое значение (NULL, если текстовый параметр или финальный вывод)
                        text_value TEXT, -- Альтернативное текстовое значение (NULL для числовых)
                        action TEXT NOT NULL, -- Действие (вывод эксперта)
-                       rule_type TEXT CHECK (rule_type IN ('symptom', 'intermediate', 'final')) NOT NULL -- Тип правила
+                       rule_type TEXT CHECK (rule_type IN ('symptom', 'error', 'intermediate', 'final')) NOT NULL -- Тип правила
 );
 
 CREATE TABLE rule_dependencies (
@@ -16,18 +17,18 @@ CREATE TABLE rule_dependencies (
 );
 
 CREATE TABLE rule_combinations (
-                                   id SERIAL PRIMARY KEY,
-                                   combination_id INT NOT NULL, -- Группа правил, которые должны сработать вместе
-                                   rule_id INT REFERENCES rules(id) ON DELETE CASCADE -- Одно из правил в комбинации
+                                   combination_id SERIAL PRIMARY KEY,
+                                   final_rule_name VARCHAR(255) NOT NULL,  -- Имя финального правила (например, 'HeadGasketFailure')
+                                   component_rule_name VARCHAR(255) NOT NULL  -- Имя правила-компонента (например, 'CoolingSystemIssue')
 );
 
 CREATE TABLE diagnostic_data (
-                                 id SERIAL PRIMARY KEY,
-                                 vehicle_id TEXT NOT NULL,
-                                 parameter_name TEXT NOT NULL,
-                                 parameter_value TEXT NOT NULL, -- Значение может быть и числом, и текстом
-                                 source TEXT CHECK (source IN ('symptom', 'full_data')) -- Источник данных (симптом или полный набор)
+                                 log_id SERIAL PRIMARY KEY,
+                                 event_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                 rule_name VARCHAR(255) NOT NULL,
+                                 value VARCHAR(255)  -- Можно хранить данные в виде строки (например, "true", "55", и т.п.)
 );
+
 CREATE TABLE fact_groups (
                              id SERIAL PRIMARY KEY,
                              name TEXT NOT NULL UNIQUE -- Название группы (например, "Система охлаждения", "Топливная система")

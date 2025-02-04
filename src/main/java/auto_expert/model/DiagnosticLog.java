@@ -2,39 +2,25 @@ package auto_expert.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "diagnostic_logs")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DiagnosticLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long logId;
 
-    @Column(nullable = false)
-    private String vehicleId;
+    private LocalDateTime eventTime = LocalDateTime.now();
 
-    @Column(nullable = false)
-    private String diagnosis;
+    private String result;
 
-    @Column(nullable = false)
+    @Column(length = 1024)
     private String explanation;
-
-    @Column(nullable = false)
-    private LocalDateTime timestamp = LocalDateTime.now(); // ✅ Добавляем значение по умолчанию
-
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getVehicleId() { return vehicleId; }
-    public void setVehicleId(String vehicleId) { this.vehicleId = vehicleId; }
-
-    public String getDiagnosis() { return diagnosis; }
-    public void setDiagnosis(String diagnosis) { this.diagnosis = diagnosis; }
-
-    public String getExplanation() { return explanation; }
-    public void setExplanation(String explanation) { this.explanation = explanation; }
-
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }
+
+

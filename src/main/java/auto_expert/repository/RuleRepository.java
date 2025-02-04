@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RuleRepository extends JpaRepository<Rule, Long> {
+public interface RuleRepository extends JpaRepository<Rule, String> {
     List<Rule> findByParameterName(String parameterName);  // Найти все правила по параметру
 }
 

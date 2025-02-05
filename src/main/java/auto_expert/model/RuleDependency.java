@@ -1,7 +1,10 @@
 package auto_expert.model;
 import jakarta.persistence.*;
-
+import lombok.*
+        ;
 @Entity
+@Getter
+@Setter
 @Table(name = "rule_dependencies")
 public class RuleDependency {
     @Id
@@ -15,14 +18,4 @@ public class RuleDependency {
     @ManyToOne
     @JoinColumn(name = "child_rule_id", nullable = false)
     private Rule childRule;
-
-    // Getters and Setters
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
-
-    public Rule getParentRule() { return parentRule; }
-    public void setParentRule(Rule parentRule) { this.parentRule = parentRule; }
-
-    public Rule getChildRule() { return childRule; }
-    public void setChildRule(Rule childRule) { this.childRule = childRule; }
 }

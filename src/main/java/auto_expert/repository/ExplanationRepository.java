@@ -7,5 +7,4 @@ import java.util.Optional;
 
 @Repository
 public interface ExplanationRepository extends JpaRepository<Explanation, Long> {
-    Optional<Explanation> findByRuleId(Long ruleId);
 }

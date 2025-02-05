@@ -7,5 +7,4 @@ import java.util.List;
 
 @Repository
 public interface DiagnosticLogRepository extends JpaRepository<DiagnosticLog, Long> {
-    List<DiagnosticLog> findByVehicleId(String vehicleId);
 }

@@ -7,5 +7,4 @@ import java.util.List;
 
 @Repository
 public interface RuleDependencyRepository extends JpaRepository<RuleDependency, Long> {
-    List<RuleDependency> findByParentRuleId(Long parentRuleId);  // Найти все зависимые правила для родительского правила
 }
